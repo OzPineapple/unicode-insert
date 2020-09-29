@@ -1,0 +1,28 @@
+#!/bin/bash
+
+LISTNUM=38
+DMENUOPT="-i -y 200 -l 20 -g 2 -bw 2 -p UNICODE: "
+
+CATEGORY=$( unidesc -l | dmenu $DMENUOPT )
+[[ -z "$CATEGORY" ]] && exit 1
+
+START=${CATEGORY:1:6 }
+
+function listUni {
+	OPT=$( echo -e "NEXT\nPREV\n$(print-unicode-seq $LISTNUM $START )" | dmenu $DMENUOPT )
+	if [[ $OPT == PREV ]]; then
+		START=$( printf "%X" $[ 0x$START - $LISTNUM ]  )
+	elif [[ $OPT == NEXT ]]; then
+		START=$( printf "%X" $[ 0x$START + $LISTNUM ]  )
+	elif [[ -z $OPT ]]; then
+		exit 1
+	else
+		xdotool type "$( cut -d' ' -f 3 <<< "$OPT" )"
+		exit 0;
+	fi
+}
+
+listUni
+while [[ $OPT == PREV ]] || [[ $OPT == NEXT ]]; do
+	listUni
+done
