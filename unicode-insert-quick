@@ -2,4 +2,4 @@
 eval $( xdotool getmouselocation --shell )
 (( $Y > 940 )) && let Y=$Y-150
 (( $X > 1630 )) && let X=$X-300
-xdotool type "$( echo 0003 | dmenu -dy "print-unicode-seq 5" -i -x $X -y $Y -w 500 -g 1 -l 5 -bw 1 -p "HEXA-UNI:"| cut -f 3 -d ' ' )"
+xdotool type "$( dmenu -dy "print-unicode-seq 5" -i -x $X -y $Y -w 500 -g 1 -l 5 -bw 1 -p "HEXA-UNI:" < /dev/null | cut -f 3 -d ' ' )"
