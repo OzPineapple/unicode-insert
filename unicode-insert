@@ -1,7 +1,7 @@
 #!/bin/bash
 
 LISTNUM=38
-DMENUOPT="-i -y 200 -l 20 -g 2 -bw 2 -p UNICODE: "
+DMENUOPT="-i -c -wd 1600 -l 20 -g 2 -bw 2 -p UNICODE: "
 
 CATEGORY=$( unidesc -l | dmenu $DMENUOPT )
 [[ -z "$CATEGORY" ]] && exit 1

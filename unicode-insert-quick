@@ -1,5 +1,18 @@
 #!/bin/bash
+UNICODE="/usr/share/unicode/UnicodeData.txt"
+[[ -r "$UNICODE" ]] || { echo "This script requieres the UnicodeData.txt file from the package unicode-character-database"; exit 1; }
+CMD="grep < $UNICODE -i "
 eval $( xdotool getmouselocation --shell )
 (( $Y > 940 )) && let Y=$Y-150
 (( $X > 1630 )) && let X=$X-300
-xdotool type "$( dmenu -dy "print-unicode-seq 5" -i -x $X -y $Y -w 500 -g 1 -l 5 -bw 1 -p "HEXA-UNI:" < /dev/null | cut -f 3 -d ' ' )"
+
+CHARS="Unicode:"
+
+while true
+do
+	CHAR=$( dmenu -dy "$CMD" -i -x $X -y $Y -wd 800 -l 5 -bw 1 -p "$CHARS" < /dev/null | cut -d";" -f 1);
+	[[ $CHARS == "Unicode:" ]] && CHARS=""
+	[[ -z $CHAR ]]  && { xdotool type "$CHARS"; exit 0; }
+	CHARS+=$( echo -e "\U$CHAR" )
+done
+
