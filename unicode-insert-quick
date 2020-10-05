@@ -1,7 +1,7 @@
 #!/bin/bash
 UNICODE="/usr/share/unicode/UnicodeData.txt"
 [[ -r "$UNICODE" ]] || { echo "This script requieres the UnicodeData.txt file from the package unicode-character-database"; exit 1; }
-CMD="grep < $UNICODE -i "
+CMD="print-unicode-seq"
 eval $( xdotool getmouselocation --shell )
 (( $Y > 940 )) && let Y=$Y-150
 (( $X > 1630 )) && let X=$X-300
@@ -10,7 +10,7 @@ CHARS="Unicode:"
 
 while true
 do
-	CHAR=$( dmenu -dy "$CMD" -i -x $X -y $Y -wd 800 -l 5 -bw 1 -p "$CHARS" < /dev/null | cut -d";" -f 1);
+	CHAR=$( dmenu -dy "$CMD" -i -x $X -y $Y -wd 600 -l 5 -bw 1 -p "$CHARS" < /dev/null | cut -d";" -f 1);
 	[[ $CHARS == "Unicode:" ]] && CHARS=""
 	[[ -z $CHAR ]]  && { xdotool type "$CHARS"; exit 0; }
 	CHARS+=$( echo -e "\U$CHAR" )

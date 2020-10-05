@@ -1,0 +1,6 @@
+#!/bin/bash
+UNICODE="/usr/share/unicode/UnicodeData.txt"
+[[ -z "$@" ]] && exit 0
+[[ -r "$UNICODE" ]] || exit 1
+SEARCH=$( sed "s/ /\\\ /g" <<< "$@" )
+grep -i "$SEARCH" "$UNICODE" | cut -d';' -f 1-2
