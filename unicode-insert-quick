@@ -1,18 +1,11 @@
 #!/bin/bash
-UNICODE="/usr/share/unicode/UnicodeData.txt"
-[[ -r "$UNICODE" ]] || { echo "This script requieres the UnicodeData.txt file from the package unicode-character-database"; exit 1; }
-CMD="print-unicode-seq"
-eval $( xdotool getmouselocation --shell )
-(( $Y > 940 )) && let Y=$Y-150
-(( $X > 1630 )) && let X=$X-300
-
-CHARS="Unicode:"
-
-while true
+UNICODEFILE="/usr/share/unicode/UnicodeData.txt"
+[[ -r "$UNICODEFILE" ]] || { echo "This script requieres the UnicodeData.txt file from the package unicode-character-database"; exit 1; }
+CHAR=$( dmenu -i -w $( xdotool getwindowfocus ) -l 5 -p "unicode" < $UNICODEFILE | cut -d";" -f 1);
+[[ -z $CHAR ]] && exit 0
+for unicode in $CHAR
 do
-	CHAR=$( dmenu -dy "$CMD" -i -x $X -y $Y -wd 600 -l 5 -bw 1 -p "$CHARS" < /dev/null | cut -d";" -f 1);
-	[[ $CHARS == "Unicode:" ]] && CHARS=""
-	[[ -z $CHAR ]]  && { xdotool type "$CHARS"; exit 0; }
-	CHARS+=$( echo -e "\U$CHAR" )
+	UNICODE+=$( printf "\U$unicode" )
 done
-
+xdotool type "$UNICODE"
+printf "$UNICODE" | xclip -i -select clipboard
