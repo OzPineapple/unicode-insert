@@ -1,6 +1,9 @@
 #!/bin/bash
 UNICODE="/usr/share/unicode/UnicodeData.txt"
-[[ -z "$@" ]] && exit 0
 [[ -r "$UNICODE" ]] || exit 1
-SEARCH=$( sed "s/ /.*/g" <<< "$@" )
-grep -i "$SEARCH" "$UNICODE" | cut -d';' -f 1-2
+# https://superuser.com/questions/377793/view-unicode-codepoints-for-all-letters-in-file-on-bash
+DUMPS=$( xclip -o | iconv -f utf8 -t utf32le | hexdump -e '"%04X\n"' )
+for dump in $DUMPS; do
+	FIND+="$( grep "^${dump};" $UNICODE | cut -d ";" -f 1-2 )\t"
+done
+[[ -z $FIND ]] || echo -e "Unicode dump:\t$FIND" | xnotify

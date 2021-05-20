@@ -1,0 +1,49 @@
+#!/bin/bash
+
+UNICODEFILE="/usr/share/unicode/UnicodeData.txt"
+BLOCKSFILE="/usr/share/unicode/Blocks.txt"
+CACHE="$HOME/.cache/unicode"
+
+[[ -r "$UNICODEFILE" ]] || { echo "This script requieres the UnicodeData.txt file from the package unicode-character-database"; exit 1; }
+[[ -r "$BLOCKSFILE" ]] || { echo "This script requieres the Blocks.txt file from the package unicode-character-database"; exit 1; }
+[[ -r "$CACHE" ]] || touch $CACHE
+
+AWIN=$( xdotool getwindowfocus )
+LIMIT=5
+
+if [ $1 = "--blocks" ]; then
+	BLOCK=$( tail -n +35 "$BLOCKSFILE" | head -n -2 | dmenu -i -w $AWIN -l 20 -p "UNICODE: " | tr ".;" "  " )
+	[[ -z "$BLOCK" ]] && exit 0
+
+	SRT=$( printf "%d" "0x$( cut -d " " -f 1 <<< "$BLOCK" )" )
+	[[ $SRT = 0 ]] || SRT=$(( $SRT + 1 ))
+	END=$(( $( printf "%d" "0x$( cut -d " " -f 3 <<< "$BLOCK" )") - $SRT + 2 ))
+	PROMT=$( cut -d " " -f 5- <<< "$BLOCK" )
+
+	CHAR=$( tail -n "+$SRT" "$UNICODEFILE" | head -n "$END" | dmenu -i -w $AWIN -l 8 -p "$PROMT: " )
+else
+	CHAR=$( cat $CACHE $UNICODEFILE |  dmenu -i -w $AWIN -l 8 -p "unicode: " );
+fi
+
+[[ -z $CHAR ]] && exit 0
+
+grep "$CHAR" $CACHE || echo "$CHAR" | cat -  $CACHE > "${CACHE}_tmp" && mv "${CACHE}_tmp" $CACHE
+CHAR=$( cut -d ";" -f 1 <<< "$CHAR" )
+
+for unicode in $CHAR
+do
+	UNICODE+=$( printf "\U$unicode" )
+done
+
+xdotool windowactivate $AWIN
+xdotool type "$UNICODE"
+
+printf "$UNICODE" | xclip -i -select clipboard
+
+[[ "$( wc -l < $CACHE )" -gt "$LIMIT" ]] && head -n $LIMIT $CACHE > "${CACHE}_tmp"  && mv "${CACHE}_tmp" $CACHE
+
+
+
+
+
+
