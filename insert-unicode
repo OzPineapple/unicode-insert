@@ -15,10 +15,16 @@ if [ $1 = "--blocks" ]; then
 	BLOCK=$( tail -n +35 "$BLOCKSFILE" | head -n -2 | dmenu -i -w $AWIN -l 20 -p "UNICODE: " | tr ".;" "  " )
 	[[ -z "$BLOCK" ]] && exit 0
 
-	SRT=$( printf "%d" "0x$( cut -d " " -f 1 <<< "$BLOCK" )" )
-	[[ $SRT = 0 ]] || SRT=$(( $SRT + 1 ))
-	END=$(( $( printf "%d" "0x$( cut -d " " -f 3 <<< "$BLOCK" )") - $SRT + 2 ))
+	SRT=$( cut -d " " -f 1 <<< "$BLOCK" )
+	END=$( cut -d " " -f 3 <<< "$BLOCK" )
 	PROMT=$( cut -d " " -f 5- <<< "$BLOCK" )
+
+	SRT=$( grep "^$SRT;" $UNICODEFILE -n | cut -d ":" -f 1 )
+	END=$( grep "^$END;" $UNICODEFILE -n | cut -d ":" -f 1 )
+
+	END=$(( $END - $SRT + 1 ))
+
+	echo $SRT $END
 
 	CHAR=$( tail -n "+$SRT" "$UNICODEFILE" | head -n "$END" | dmenu -i -w $AWIN -l 8 -p "$PROMT: " )
 else
